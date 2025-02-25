@@ -1,0 +1,26 @@
+[tool.pylint.'MESSAGES CONTROL']
+disable = """
+invalid-name,
+redefined-outer-name,
+"""
+
+[tool.mypy]
+warn_unused_ignores = true
+disable_error_code = ["import-untyped"]
+
+[tool.ruff]
+line-length = 88
+output-format = "pylint"
+respect-gitignore = true
+
+[tool.ruff.lint]
+# Enable specific rules
+select = [
+    "F",  # Flake8 rules
+    "E",  # Pycodestyle errors
+    "W",  # Pycodestyle warnings
+    "C",  # Cyclomatic complexity
+    "PL", # PyLint-compatible rules
+    "I"   # Import checks
+]
+
