@@ -1,0 +1,9 @@
+__pycache__/
+.mypy_cache/
+.ruff_cache/
+.vscode/
+.env
+*.png
+*.pt
+checkpoints/
+figures/
