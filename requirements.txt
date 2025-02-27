@@ -10,6 +10,7 @@ comet_ml==3.49.3
 optuna==4.2.1
 optuna-dashboard==0.17.0
 python-dotenv==1.0.1
+ucimlrepo==0.0.7
 
 # Developer utils
 ruff
