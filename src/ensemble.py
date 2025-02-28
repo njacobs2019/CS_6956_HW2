@@ -15,6 +15,7 @@ class Result(NamedTuple):
     """
 
     mean: Tensor
+    median: Tensor
     min: Tensor
     max: Tensor
     sd: Tensor
@@ -46,6 +47,7 @@ def predict(x: Tensor, models: Sequence[nn.Module]) -> Result:
 
     return Result(
         mean=torch.mean(predictions, dim=0),
+        median=torch.median(predictions, dim=0).values,
         min=torch.min(predictions, dim=0)[0],
         max=torch.max(predictions, dim=0)[0],
         sd=torch.std(predictions, dim=0),
@@ -54,9 +56,11 @@ def predict(x: Tensor, models: Sequence[nn.Module]) -> Result:
 
 def evaluate(
     loader: DataLoader, device: torch.device, ensemble: Sequence[nn.Module]
-) -> tuple[float, float]:
+) -> tuple[float, float, float]:
     """
     Evaluates performance and uncertainty of an ensemble
+    MSE_mean - MSE when ensemble prediction is mean of ensemble
+    MSE_median - MSE when ensemble prediction is median of ensemble
 
     Args:
         loader (DataLoader): Data loader
@@ -64,10 +68,11 @@ def evaluate(
         ensemble (Sequence[nn.Module]): Ensemble
 
     Returns:
-        tuple[float, float]: MSE, average SD
+        tuple[float, float]: MSE_mean, MSE_median, average SD
     """
 
-    mse = 0.0
+    mse_mean = 0.0
+    mse_median = 0.0
     sd = 0.0
     total_samples = 0
 
@@ -81,12 +86,15 @@ def evaluate(
             pred = predict(x, ensemble)
 
             mse_update = torch.mean(torch.square(pred.mean - y))
+            mse_median_update = torch.mean(torch.square(pred.median - y))
             sd_update = torch.mean(pred.sd)
 
-            mse += mse_update.item() * batch_size
+            mse_mean += mse_update.item() * batch_size
+            mse_median += mse_median_update.item() * batch_size
             sd += sd_update.item() * batch_size
 
-    mse = mse / total_samples
+    mse_mean = mse_mean / total_samples
+    mse_median = mse_median / total_samples
     sd = sd / total_samples
 
-    return mse, sd
+    return mse_mean, mse_median, sd
