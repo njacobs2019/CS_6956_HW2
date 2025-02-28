@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from torch.utils.data import DataLoader, random_split
 
 from .datasets import Poly
-from .models import ModelMicro
+from .models import ModelSmall
 from .train import train
 
 load_dotenv()
@@ -32,7 +32,7 @@ test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
 for i in range(10):
     # Model
     torch.manual_seed(i + 100)
-    model = ModelMicro(input_dim=1, hidden_dim=16)
+    model = ModelSmall(input_dim=1, hidden_dim=64)
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=0.01)
 
     # Log and train
@@ -45,7 +45,7 @@ for i in range(10):
             auto_metric_logging=False,
             disabled=False,  # Set True for debugging runs
             # name=f"Poly_Trad_Ensemble_Micro_Member_{epochs}_epochs",
-            name=f"Poly_Trad_Micro_Ensemble_{epochs}_16_dim",
+            name=f"Poly_Trad_Ensemble_{epochs}_64_dim",
         ),
     )
 
