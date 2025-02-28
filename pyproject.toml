@@ -2,6 +2,7 @@
 disable = """
 invalid-name,
 redefined-outer-name,
+duplicate-code,
 """
 
 [tool.mypy]
