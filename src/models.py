@@ -7,7 +7,7 @@ from torch import Tensor, nn
 
 class PolyModelSmall(nn.Module):
     """
-    Regression model for the polydataset
+    Regression model for the poly dataset
     """
 
     def __init__(self, input_dim: int, hidden_dim: int = 64, output_dim: int = 1):
