@@ -21,6 +21,7 @@ def train(  # pylint: disable=R0913,R0917,R0914
     epochs: int,
     comet_experiment: comet_ml.Experiment | None,
     optuna_trial: optuna.trial.Trial | None = None,
+    log_batches: bool = True,
 ) -> float:
     """
     Trains a single model with MSE loss.
@@ -37,6 +38,7 @@ def train(  # pylint: disable=R0913,R0917,R0914
         comet_experiment (comet_ml.Experiment): Comet experiment for logging
         trial (optuna.trial.Trial | None, optional): Optuna trial for tuning.
                                                      Defaults to None.
+        log_batches (bool, optional): Log stats after every mini-batch. Default, True.
 
     Raises:
         optuna.TrialPruned: If using Optuna with pruning
@@ -75,7 +77,7 @@ def train(  # pylint: disable=R0913,R0917,R0914
 
             # Update loss metric
             train_loss += loss.item() * batch_size
-            if comet_experiment is not None:
+            if comet_experiment is not None and log_batches:
                 comet_experiment.log_metric("train_loss", loss.item(), step=step)
             step += 1
 
