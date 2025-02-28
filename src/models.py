@@ -5,7 +5,7 @@ Defines model architectures
 from torch import Tensor, nn
 
 
-class PolyModelSmall(nn.Module):
+class ModelSmall(nn.Module):
     """
     Regression model for the poly dataset
     """
@@ -33,7 +33,7 @@ class PolyModelSmall(nn.Module):
         return self.network(x)
 
 
-class PolyModelMicro(nn.Module):
+class ModelMicro(nn.Module):
     """
     Regression model for the poly dataset
     """

@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from torch.utils.data import DataLoader, random_split
 
 from .datasets import Poly
-from .models import PolyModelMicro
+from .models import ModelMicro
 from .train import train
 
 load_dotenv()
@@ -31,7 +31,7 @@ test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
 
 for i in range(10):
     # Model
-    model = PolyModelMicro(input_dim=1, hidden_dim=16)
+    model = ModelMicro(input_dim=1, hidden_dim=16)
     optimizer = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=0)
 
     # Log and train
