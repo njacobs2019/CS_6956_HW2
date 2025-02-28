@@ -31,8 +31,9 @@ test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
 
 for i in range(10):
     # Model
+    torch.manual_seed(i + 100)
     model = ModelMicro(input_dim=1, hidden_dim=16)
-    optimizer = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=0)
+    optimizer = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=0.01)
 
     # Log and train
     experiment = comet_ml.start(
@@ -44,8 +45,17 @@ for i in range(10):
             auto_metric_logging=False,
             disabled=False,  # Set True for debugging runs
             # name=f"Poly_Trad_Ensemble_Micro_Member_{epochs}_epochs",
-            name=f"Poly_Trad_Ensemble_Micro_Member_{epochs}_16_dim",
+            name=f"Poly_Trad_Micro_Ensemble_{epochs}_16_dim",
         ),
     )
 
-    train(model, optimizer, device, train_loader, test_loader, epochs, experiment)
+    train(
+        model,
+        optimizer,
+        device,
+        train_loader,
+        test_loader,
+        epochs,
+        experiment,
+        log_batches=False,
+    )

@@ -31,8 +31,9 @@ test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
 
 for i in range(10):
     # Model
+    torch.manual_seed(i + 100)
     model = ModelSmall(input_dim=11, hidden_dim=h_dim)
-    optimizer = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=0)
+    optimizer = torch.optim.Adam(model.parameters(), lr=3e-4, weight_decay=0.01)
 
     # Log and train
     experiment = comet_ml.start(
@@ -43,7 +44,7 @@ for i in range(10):
         experiment_config=comet_ml.ExperimentConfig(
             auto_metric_logging=False,
             disabled=False,  # Set True for debugging runs
-            name=f"Wine_Trad_Ensemble_Member_{epochs}_{h_dim}",
+            name=f"Wine_Trad_Ensemble_{epochs}_{h_dim}",
         ),
     )
 
