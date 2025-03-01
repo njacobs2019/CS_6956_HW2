@@ -128,7 +128,7 @@ def train(  # pylint: disable=R0913,R0917,R0914
     return val_loss
 
 
-def train_fge(
+def train_fge(  # pylint: disable=R0913,R0917,R0914,R0915
     model: nn.Module,
     device: torch.device,
     train_loader: DataLoader,
@@ -145,23 +145,24 @@ def train_fge(
 
     iters_per_half_cycle = int(len(train_loader) * epoch_per_cycle / 2)
 
-    # Save first checkpoint
-    ## HERE
+    print(f"Num training batches: {len(train_loader)}")
+    print(f"Iters per half cycle {iters_per_half_cycle}")
 
     optimizer = torch.optim.Adam(model.parameters(), alpha_1)
     scheduler = torch.optim.lr_scheduler.CyclicLR(
         optimizer,
-        base_lr=alpha_2,
-        max_lr=alpha_1,
+        base_lr=alpha_1,
+        max_lr=alpha_2,
         step_size_up=iters_per_half_cycle,
         step_size_down=iters_per_half_cycle,
-        verbose=True,
     )
 
     # Train the model
     model.to(device)
     loss_fn = nn.MSELoss()
 
+    end_condition = False
+    model_num = 0
     step = 0  # current batchnum in training
     # for epoch in tqdm(range(num_members * epoch_per_cycle)):
     for epoch in range(num_members * epoch_per_cycle):
@@ -187,17 +188,32 @@ def train_fge(
             optimizer.step()
             scheduler.step()
 
-            print(optimizer.param_groups[0]["lr"])
-
             # Update loss metric
             train_loss += loss.item() * batch_size
             if comet_experiment is not None:
-                comet_experiment.log_metric("train_loss", loss.item(), step=step)
-            step += 1
+                comet_experiment.log_metrics(
+                    {
+                        "fge_train_loss": loss.item(),
+                        "lr": optimizer.param_groups[0]["lr"],
+                    },
+                    step=step,
+                )
 
             train_loss = train_loss / total_samples
 
             # if proper step, save the model
+            if abs(optimizer.param_groups[0]["lr"] - alpha_2) < 0.000001:
+                print(f"Saving model {model_num} to disk, step {step}")
+                if comet_experiment is not None:
+                    torch.save(
+                        model.state_dict(),
+                        f"./checkpoints/{comet_experiment.get_key()}_fge_{model_num}.pt",
+                    )
+                model_num += 1
+                if model_num == num_members:
+                    end_condition = True
+                    break
+            step += 1
 
         # Validation loop
         model.eval()
@@ -222,5 +238,8 @@ def train_fge(
         # Log the loss
         if comet_experiment is not None:
             comet_experiment.log_metrics(
-                {"train_loss": train_loss, "val_loss": val_loss}, epoch=epoch
+                {"fge_train_loss": train_loss, "fge_val_loss": val_loss}, epoch=epoch
             )
+
+        if end_condition:
+            break

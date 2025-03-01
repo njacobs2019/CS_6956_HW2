@@ -18,8 +18,8 @@ COMET_API_KEY = os.getenv("COMET_API_KEY")
 
 
 ### Params
-batch_size = 256
-epochs = 100
+batch_size = 128
+epochs = 200
 h_dim = 32
 device = torch.device("cuda:1")
 
@@ -28,7 +28,6 @@ device = torch.device("cuda:1")
 train_ds, test_ds = get_wine_data()
 train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
-
 
 # Model
 model = ModelSmall(input_dim=11, hidden_dim=h_dim)
@@ -42,7 +41,7 @@ experiment = comet_ml.start(
     online=True,
     experiment_config=comet_ml.ExperimentConfig(
         auto_metric_logging=False,
-        disabled=True,  # Set True for debugging runs
+        disabled=False,  # Set True for debugging runs
         name="WINE_FGE_TEST",
     ),
 )
@@ -62,8 +61,12 @@ train(
 train_fge(
     model,
     device,
-    train_loader,
+    DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True),
     test_loader,
-    num_members=2,
+    num_members=5,
     comet_experiment=experiment,
+    # alpha_1=8e-3,
+    alpha_1=0.05,
+    # alpha_2=4e-5,
+    alpha_2=4e-4,
 )
