@@ -126,3 +126,101 @@ def train(  # pylint: disable=R0913,R0917,R0914
         )
 
     return val_loss
+
+
+def train_fge(
+    model: nn.Module,
+    device: torch.device,
+    train_loader: DataLoader,
+    val_loader: DataLoader,
+    num_members: int = 10,
+    alpha_1: float = 0.01,
+    alpha_2: float = 0.0005,
+    comet_experiment: comet_ml.Experiment | None = None,
+):
+    # takes in an initialized/partially trained model and runs FGE to calculate
+    # multiple checkpoints
+
+    epoch_per_cycle = 4
+
+    iters_per_half_cycle = int(len(train_loader) * epoch_per_cycle / 2)
+
+    # Save first checkpoint
+    ## HERE
+
+    optimizer = torch.optim.Adam(model.parameters(), alpha_1)
+    scheduler = torch.optim.lr_scheduler.CyclicLR(
+        optimizer,
+        base_lr=alpha_2,
+        max_lr=alpha_1,
+        step_size_up=iters_per_half_cycle,
+        step_size_down=iters_per_half_cycle,
+        verbose=True,
+    )
+
+    # Train the model
+    model.to(device)
+    loss_fn = nn.MSELoss()
+
+    step = 0  # current batchnum in training
+    # for epoch in tqdm(range(num_members * epoch_per_cycle)):
+    for epoch in range(num_members * epoch_per_cycle):
+        model.train()
+        train_loss = 0.0
+        total_samples = 0
+
+        # Train loop
+        for x, y in train_loader:
+            batch_size = x.size(0)
+            total_samples += batch_size
+
+            optimizer.zero_grad()
+
+            # Forward pass
+            x = x.to(device)
+            y = y.to(device)
+            prediction = model(x)
+            loss = loss_fn(y, prediction)
+
+            # Backward pass
+            loss.backward()
+            optimizer.step()
+            scheduler.step()
+
+            print(optimizer.param_groups[0]["lr"])
+
+            # Update loss metric
+            train_loss += loss.item() * batch_size
+            if comet_experiment is not None:
+                comet_experiment.log_metric("train_loss", loss.item(), step=step)
+            step += 1
+
+            train_loss = train_loss / total_samples
+
+            # if proper step, save the model
+
+        # Validation loop
+        model.eval()
+        val_loss = 0.0
+        total_samples = 0
+
+        with torch.no_grad():
+            for x, y in val_loader:
+                batch_size = x.size(0)
+                total_samples += batch_size
+
+                x = x.to(device)
+                y = y.to(device)
+
+                # Calculate loss
+                prediction = model(x)
+                loss = loss_fn(y, prediction)
+
+                val_loss += loss.item() * batch_size
+        val_loss = val_loss / total_samples
+
+        # Log the loss
+        if comet_experiment is not None:
+            comet_experiment.log_metrics(
+                {"train_loss": train_loss, "val_loss": val_loss}, epoch=epoch
+            )
