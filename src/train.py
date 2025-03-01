@@ -148,7 +148,7 @@ def train_fge(  # pylint: disable=R0913,R0917,R0914,R0915
     print(f"Num training batches: {len(train_loader)}")
     print(f"Iters per half cycle {iters_per_half_cycle}")
 
-    optimizer = torch.optim.Adam(model.parameters(), alpha_1)
+    optimizer = torch.optim.Adam(model.parameters(), alpha_1, weight_decay=0.01)
     scheduler = torch.optim.lr_scheduler.CyclicLR(
         optimizer,
         base_lr=alpha_1,
