@@ -4,6 +4,7 @@ Utilities for working with ensembles
 
 from typing import NamedTuple, Sequence
 
+import pandas as pd
 import torch
 from torch import Tensor, nn
 from torch.utils.data import DataLoader
@@ -98,3 +99,26 @@ def evaluate(
     sd = sd / total_samples
 
     return mse_mean, mse_median, sd
+
+
+def evaluate_ensemble_components(
+    train_loader: DataLoader,
+    test_loader: DataLoader,
+    device: torch.device,
+    ensemble: Sequence[nn.Module],
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Returns a dataframe with train and test MSE for each ensemble member
+    """
+
+    data: dict[str, list] = {"train_loss": [], "test_loss": []}
+
+    for model in ensemble:
+        train = evaluate(train_loader, device, [model])[0]
+        test = evaluate(test_loader, device, [model])[0]
+        data["train_loss"].append(train)
+        data["test_loss"].append(test)
+
+    df = pd.DataFrame(data)
+
+    return df
