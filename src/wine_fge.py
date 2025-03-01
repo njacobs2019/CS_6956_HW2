@@ -1,5 +1,5 @@
 """
-This script trains several different traditional ensemble members on the wine dataset
+This script trains several different ensemble members on the wine dataset with FGE
 """
 
 import os
@@ -65,8 +65,6 @@ train_fge(
     test_loader,
     num_members=5,
     comet_experiment=experiment,
-    # alpha_1=8e-3,
-    alpha_1=0.05,
-    # alpha_2=4e-5,
-    alpha_2=4e-4,
+    alpha_1=8e-3,
+    alpha_2=4e-5,
 )
