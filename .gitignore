@@ -7,3 +7,6 @@ __pycache__/
 *.pt
 checkpoints/
 figures/
+analyze.sh
+temp_mypy.txt
+temp_pylint.txt
