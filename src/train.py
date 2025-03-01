@@ -138,8 +138,21 @@ def train_fge(  # pylint: disable=R0913,R0917,R0914,R0915
     alpha_2: float = 0.0005,
     comet_experiment: comet_ml.Experiment | None = None,
 ):
-    # takes in an initialized/partially trained model and runs FGE to calculate
-    # multiple checkpoints
+    """
+    Takes in an initialized/partially trained model and runs FGE to calcualte multiple
+    checkpoints.  It uses a cyclic learning rate.
+
+    Args:
+        model (nn.Module): The model
+        device (torch.device): Compute device
+        train_loader (DataLoader): Training dataloader
+        val_loader (DataLoader): Validation dataloader
+        num_members (int, optional): Number of ensemble members. Defaults to 10.
+        alpha_1 (float, optional): High learning rate. Defaults to 0.01.
+        alpha_2 (float, optional): Low learning rate. Defaults to 0.0005.
+        comet_experiment (comet_ml.Experiment | None, optional): Comet experiment for
+            logging. Defaults to None.
+    """
 
     epoch_per_cycle = 4
 

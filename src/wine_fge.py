@@ -42,7 +42,7 @@ experiment = comet_ml.start(
     experiment_config=comet_ml.ExperimentConfig(
         auto_metric_logging=False,
         disabled=False,  # Set True for debugging runs
-        name="WINE_FGE_TEST",
+        name="Wine_FGE_Ensemble",
     ),
 )
 
@@ -63,7 +63,7 @@ train_fge(
     device,
     DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True),
     test_loader,
-    num_members=5,
+    num_members=10,
     comet_experiment=experiment,
     alpha_1=8e-3,
     alpha_2=4e-5,
