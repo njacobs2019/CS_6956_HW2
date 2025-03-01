@@ -18,7 +18,7 @@ COMET_API_KEY = os.getenv("COMET_API_KEY")
 
 
 ### Params
-epochs = 400
+epochs = 800
 device = torch.device("cuda:1")
 
 
@@ -40,7 +40,7 @@ experiment = comet_ml.start(
     experiment_config=comet_ml.ExperimentConfig(
         auto_metric_logging=False,
         disabled=False,  # Set True for debugging runs
-        name="POLY_FGE_TEST",
+        name="Poly_FGE_Ensemble",
     ),
 )
 
@@ -61,7 +61,7 @@ train_fge(
     device,
     DataLoader(train_ds, batch_size=256, shuffle=True, drop_last=True),
     test_loader,
-    num_members=5,
+    num_members=10,
     comet_experiment=experiment,
     alpha_1=8e-3,
     alpha_2=4e-5,
